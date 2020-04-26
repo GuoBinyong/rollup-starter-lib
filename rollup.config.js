@@ -3,17 +3,39 @@ import commonjs from 'rollup-plugin-commonjs';
 import typescript from 'rollup-plugin-typescript';
 import pkg from './package.json';
 
+/**
+ * the string separated by the specified separator is converted to hump format
+ *
+ * @param  str : string    Converted string
+ * @param separators ?: string | Array<string>   optional; default: ["-","_"] ; separator or separator good array ["-","_"]；
+ * @returns string  return shump format string
+ */
+function toHumpFormat(str, separators) {
+	if (separators == undefined) {
+		separators = ['-', '_'];
+	} else if (!Array.isArray(separators)) {
+		separators = [separators]
+	}
+	var separatorRexStr = '(' + separators.join('|') + ')' + '+([A-Za-z]?)'
+	var separatorRex = new RegExp(separatorRexStr, 'g');
+	return str.replace(separatorRex, function (match, p1, p2) {
+		return p2.toUpperCase();
+	});
+}
+  
+  
+
 export default [
 	// browser-friendly UMD build
 	{
 		input: 'src/main.ts',
 		output: {
-			name: 'howLongUntilLunch',
+			name: toHumpFormat(pkg.name),
 			file: pkg.browser,
 			format: 'umd'
 		},
 		plugins: [
-			resolve(),   // so Rollup can find `ms`
+			resolve(), // so Rollup can find `ms`
 			commonjs(),  // so Rollup can convert `ms` to an ES module
 			typescript() // so Rollup can convert TypeScript to JavaScript
 		]
